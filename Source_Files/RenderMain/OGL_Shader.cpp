@@ -41,6 +41,14 @@ static bool DisableClipVertex()
 }
 #endif
 
+//Global pointer to the last shader object enabled. May be NULL. extern is redundant, but included for clarity.
+Shader* lastEnabledShaderRef;
+Shader* lastEnabledShader() {
+  return lastEnabledShaderRef;
+}
+void setLastEnabledShader(Shader* theShader) {
+  lastEnabledShaderRef = theShader;
+}
 
 static std::map<std::string, std::string> defaultVertexPrograms;
 static std::map<std::string, std::string> defaultFragmentPrograms;
@@ -79,7 +87,14 @@ const char* Shader::_uniform_names[NUMBER_OF_UNIFORM_LOCATIONS] =
 	"logicalWidth",
 	"logicalHeight",
 	"pixelWidth",
-	"pixelHeight"
+	"pixelHeight",
+    "clipPlane0",
+    "clipPlane1",
+    "clipPlane2",
+    "clipPlane3",
+    "clipPlane4",
+    "clipPlane5",
+    "clipPlane6"
 };
 
 const char* Shader::_shader_names[NUMBER_OF_SHADER_TYPES] = 
@@ -197,6 +212,17 @@ GLhandleARB parseShader(const GLcharARB* str, GLenum shaderType) {
 	if(status) {
 		return shader;
 	} else {
+        GLint infoLen = 0;
+        glGetShaderiv((GLuint)(size_t)shader, GL_INFO_LOG_LENGTH, &infoLen);
+        
+        if(infoLen > 1)
+        {
+            char* infoLog = (char*) malloc(sizeof(char) * infoLen);
+            glGetShaderInfoLog((GLuint)(size_t)shader, infoLen, NULL, infoLog);
+            printf("Error compiling shader:\n%s\n", infoLog);
+            free(infoLog);
+        }
+        
 		glDeleteObjectARB(shader);
 		return 0;
 	}
@@ -297,6 +323,10 @@ void Shader::setMatrix4(UniformName name, float *f) {
 	glUniformMatrix4fvARB(getUniformLocation(name), 1, false, f);
 }
 
+void Shader::setVec4(UniformName name, float *f) {
+  glUniform4f(getUniformLocation(name), f[0], f[1], f[2], f[3]);
+}
+
 Shader::~Shader() {
 	unload();
 }
@@ -304,14 +334,19 @@ Shader::~Shader() {
 void Shader::enable() {
 	if(!_loaded) { init(); }
 	glUseProgramObjectARB(_programObj);
+    setLastEnabledShader(this);
 }
 
 void Shader::disable() {
+    setLastEnabledShader(NULL);
 	glUseProgramObjectARB(0);
 }
 
 void Shader::unload() {
 	if(_programObj) {
+        if(lastEnabledShader() == this) {
+            setLastEnabledShader(NULL);
+        }
 		glDeleteObjectARB(_programObj);
 		_programObj = 0;
 		_loaded = false;
@@ -487,8 +522,9 @@ void initDefaultPrograms() {
         "varying vec4 vertexColor;\n"
         "varying float FDxLOG2E;\n"
         "varying float classicDepth;\n"
+        "varying vec4 vPosition_eyespace;\n"
         "void main(void) {\n"
-
+        "   vPosition_eyespace = gl_ModelViewMatrix * gl_Vertex;\n"
         "	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
         "	classicDepth = gl_Position.z / 8192.0;\n"
         "#ifndef DISABLE_CLIP_VERTEX\n"
@@ -505,11 +541,19 @@ void initDefaultPrograms() {
         "uniform float glow;\n"
         "uniform float flare;\n"
         "uniform float selfLuminosity;\n"
+        "uniform vec4 clipPlane0;\n"
+        "uniform vec4 clipPlane1;\n"
+        "uniform vec4 clipPlane5;\n"
         "varying vec3 viewDir;\n"
         "varying vec4 vertexColor;\n"
         "varying float FDxLOG2E;\n"
         "varying float classicDepth;\n"
+        "varying vec4 vPosition_eyespace;\n"
         "void main (void) {\n"
+        "  bool unwantedFragment = false;\n"
+        "  if( dot( vPosition_eyespace, clipPlane0) < 0.0 ) {unwantedFragment = true;}\n"
+        "  if( dot( vPosition_eyespace, clipPlane1) < 0.0 ) {unwantedFragment = true;}\n"
+        "  if( dot( vPosition_eyespace, clipPlane5) < 0.0 ) {unwantedFragment = true;}\n"
         "	float mlFactor = clamp(selfLuminosity + flare - classicDepth, 0.0, 1.0);\n"
         "	// more realistic: replace classicDepth with (length(viewDir)/8192.0)\n"
         "	vec3 intensity;\n"
@@ -524,6 +568,7 @@ void initDefaultPrograms() {
         "	vec4 color = texture2D(texture0, gl_TexCoord[0].xy);\n"
         "	float fogFactor = clamp(exp2(FDxLOG2E * length(viewDir)), 0.0, 1.0);\n"
         "	gl_FragColor = vec4(mix(gl_Fog.color.rgb, color.rgb * intensity, fogFactor), vertexColor.a * color.a);\n"
+        "   if( unwantedFragment ) {gl_FragColor.a = 0.0;}\n"
         "}\n";
     defaultVertexPrograms["sprite_bloom"] = defaultVertexPrograms["sprite"];
     defaultFragmentPrograms["sprite_bloom"] = ""
@@ -531,11 +576,19 @@ void initDefaultPrograms() {
         "uniform float glow;\n"
         "uniform float bloomScale;\n"
         "uniform float bloomShift;\n"
+        "uniform vec4 clipPlane0;\n"
+        "uniform vec4 clipPlane1;\n"
+        "uniform vec4 clipPlane5;\n"
         "varying vec3 viewDir;\n"
         "varying vec4 vertexColor;\n"
         "varying float FDxLOG2E;\n"
         "varying float classicDepth;\n"
+        "varying vec4 vPosition_eyespace;\n"
         "void main (void) {\n"
+        "  bool unwantedFragment = false;\n"
+        "  if( dot( vPosition_eyespace, clipPlane0) < 0.0 ) {unwantedFragment = true;}\n"
+        "  if( dot( vPosition_eyespace, clipPlane1) < 0.0 ) {unwantedFragment = true;}\n"
+        "  if( dot( vPosition_eyespace, clipPlane5) < 0.0 ) {unwantedFragment = true;}\n"
         "	vec4 color = texture2D(texture0, gl_TexCoord[0].xy);\n"
         "	vec3 intensity = clamp(vertexColor.rgb, glow, 1.0);\n"
         "	//intensity = intensity * clamp(2.0 - length(viewDir)/8192.0, 0.0, 1.0);\n"
@@ -548,6 +601,7 @@ void initDefaultPrograms() {
         "#endif\n"
         "	float fogFactor = clamp(exp2(FDxLOG2E * length(viewDir)), 0.0, 1.0);\n"
         "	gl_FragColor = vec4(mix(vec3(0.0, 0.0, 0.0), color.rgb * intensity, fogFactor), vertexColor.a * color.a);\n"
+        "   if( unwantedFragment ) {gl_FragColor.a = 0.0;}\n"
         "}\n";
     
     defaultVertexPrograms["invincible"] = defaultVertexPrograms["sprite"];

@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "RenderRasterize_Shader.h"
+#include "MatrixStack.hpp"
 
 #include "lightsource.h"
 #include "media.h"
@@ -211,14 +212,15 @@ void RenderRasterize_Shader::render_node(sorted_node_data *node, bool SeeThruLiq
     RenderRasterizerClass::render_node(node, SeeThruLiquids, renderStep);
 
 	// turn off clipping planes
-	glDisable(GL_CLIP_PLANE0);
-	glDisable(GL_CLIP_PLANE1);
+	MatrixStack::Instance()->disablePlane(0);
+    MatrixStack::Instance()->disablePlane(1);
 }
 
 void RenderRasterize_Shader::clip_to_window(clipping_window_data *win)
 {
-    GLdouble clip[] = { 0., 0., 0., 0. };
-        
+    GLfloat clip[] = { 0., 0., 0., 0. };
+    GLfloat mvm[16];
+    
     // recenter to player's orientation temporarily
     glPushMatrix();
     glTranslatef(view->origin.x, view->origin.y, 0.);
@@ -228,20 +230,30 @@ void RenderRasterize_Shader::clip_to_window(clipping_window_data *win)
 	if (win->left.i != leftmost_clip.i || win->left.j != leftmost_clip.j) {
 		clip[0] = win->left.i;
 		clip[1] = win->left.j;
-		glEnable(GL_CLIP_PLANE0);
-		glClipPlane(GL_CLIP_PLANE0, clip);
+        glGetFloatv(GL_MODELVIEW_MATRIX,mvm);
+        MatrixStack::Instance()->matrixMode(MS_MODELVIEW);
+        MatrixStack::Instance()->pushMatrix();
+        MatrixStack::Instance()->loadMatrixf(mvm);
+        MatrixStack::Instance()->enablePlane(0);
+        MatrixStack::Instance()->clipPlanef(0, clip);
+        MatrixStack::Instance()->popMatrix();
 	} else {
-		glDisable(GL_CLIP_PLANE0);
+        MatrixStack::Instance()->disablePlane(0);
 	}
 	
     glRotatef(0.2, 0., 0., 1.); // breathing room for right-hand clip
 	if (win->right.i != rightmost_clip.i || win->right.j != rightmost_clip.j) {
 		clip[0] = win->right.i;
 		clip[1] = win->right.j;
-		glEnable(GL_CLIP_PLANE1);
-		glClipPlane(GL_CLIP_PLANE1, clip);
+		glGetFloatv(GL_MODELVIEW_MATRIX,mvm);
+        MatrixStack::Instance()->matrixMode(MS_MODELVIEW);
+        MatrixStack::Instance()->pushMatrix();
+        MatrixStack::Instance()->loadMatrixf(mvm);
+        MatrixStack::Instance()->enablePlane(1);
+        MatrixStack::Instance()->clipPlanef(1, clip);
+        MatrixStack::Instance()->popMatrix();
 	} else {
-		glDisable(GL_CLIP_PLANE1);
+		MatrixStack::Instance()->disablePlane(1);
 	}
     
     glPopMatrix();
@@ -929,13 +941,19 @@ void RenderRasterize_Shader::render_node_object(render_object_data *object, bool
 	media_data *media = (media_index != NONE) ? get_media_data(media_index) : NULL;
 	if (media) {
 		float h = media->height;
-		GLdouble plane[] = { 0.0, 0.0, 1.0, -h };
+		GLfloat plane[] = { 0.0, 0.0, 1.0, -h };
+        GLfloat mvm[16];
 		if (view->under_media_boundary ^ other_side_of_media) {
 			plane[2] = -1.0;
 			plane[3] = h;
 		}
-		glClipPlane(GL_CLIP_PLANE5, plane);
-		glEnable(GL_CLIP_PLANE5);
+        glGetFloatv(GL_MODELVIEW_MATRIX,mvm);
+        MatrixStack::Instance()->matrixMode(MS_MODELVIEW);
+        MatrixStack::Instance()->pushMatrix();
+        MatrixStack::Instance()->loadMatrixf(mvm);
+        MatrixStack::Instance()->clipPlanef(5, plane);
+        MatrixStack::Instance()->enablePlane(5);
+        MatrixStack::Instance()->popMatrix();
 	} else if (other_side_of_media) {
 		// When there's no media present, we can skip the second pass.
 		return;
@@ -947,7 +965,7 @@ void RenderRasterize_Shader::render_node_object(render_object_data *object, bool
         _render_node_object_helper(object, renderStep);
     }
     
-    glDisable(GL_CLIP_PLANE5);
+    MatrixStack::Instance()->disablePlane(5);
 }
 
 void RenderRasterize_Shader::_render_node_object_helper(render_object_data *object, RenderStep renderStep) {
@@ -1053,9 +1071,32 @@ void RenderRasterize_Shader::_render_node_object_helper(render_object_data *obje
 	glVertexPointer(3, GL_FLOAT, 0, vertex_array);
 	glTexCoordPointer(2, GL_FLOAT, 0, texcoord_array);
 
+    Shader* lastShader = lastEnabledShader();
+    if (lastShader) {
+      float plane0[4], plane1[4], plane5[4];
+      MatrixStack::Instance()->getPlanev(0, plane0);
+      MatrixStack::Instance()->getPlanev(1, plane1);
+      MatrixStack::Instance()->getPlanev(5, plane5);
+      lastShader->setVec4(Shader::U_ClipPlane0, plane0);
+      lastShader->setVec4(Shader::U_ClipPlane1, plane1);
+      lastShader->setVec4(Shader::U_ClipPlane5, plane5);
+    }
+    
 	glDrawArrays(GL_QUADS, 0, 4);
 
 	if (setupGlow(view, TMgr, 0, 1, weaponFlare, selfLuminosity, offset, renderStep)) {
+        
+        Shader* lastShader = lastEnabledShader();
+        if (lastShader) {
+          GLfloat plane0[4], plane1[4], plane5[4];
+          MatrixStack::Instance()->getPlanev(0, plane0);
+          MatrixStack::Instance()->getPlanev(1, plane1);
+          MatrixStack::Instance()->getPlanev(5, plane5);
+          lastShader->setVec4(Shader::U_ClipPlane0, plane0);
+          lastShader->setVec4(Shader::U_ClipPlane1, plane1);
+          lastShader->setVec4(Shader::U_ClipPlane5, plane5);
+        }
+        
 		glDrawArrays(GL_QUADS, 0, 4);
 	}
         
@@ -1249,6 +1290,17 @@ void RenderRasterize_Shader::render_viewer_sprite(rectangle_definition& RenderRe
 
         glDisable(GL_DEPTH_TEST);
 
+    Shader *theShader = lastEnabledShader();
+    if (theShader) {
+        GLfloat plane0[4], plane1[4], plane5[4];
+        MatrixStack::Instance()->getPlanev(0, plane0);
+        MatrixStack::Instance()->getPlanev(1, plane1);
+        MatrixStack::Instance()->getPlanev(5, plane5);
+        theShader->setVec4(Shader::U_ClipPlane0, plane0);
+        theShader->setVec4(Shader::U_ClipPlane1, plane1);
+        theShader->setVec4(Shader::U_ClipPlane5, plane5);
+    }
+    
 	// Location of data:
 	glVertexPointer(3,GL_DOUBLE,sizeof(ExtendedVertexData),ExtendedVertexList[0].Vertex);
 	glTexCoordPointer(2,GL_DOUBLE,sizeof(ExtendedVertexData),ExtendedVertexList[0].TexCoord);

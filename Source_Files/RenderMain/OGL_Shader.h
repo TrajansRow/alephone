@@ -63,6 +63,13 @@ public:
 		U_LogicalHeight,
 		U_PixelWidth,
 		U_PixelHeight,
+        U_ClipPlane0,
+        U_ClipPlane1,
+        U_ClipPlane2,
+        U_ClipPlane3,
+        U_ClipPlane4,
+        U_ClipPlane5,
+        U_ClipPlane6,
 		NUMBER_OF_UNIFORM_LOCATIONS
 	};
 
@@ -123,7 +130,8 @@ public:
 	void unload();
 	void setFloat(UniformName name, float); // shader must be enabled
 	void setMatrix4(UniformName name, float *f);
-
+    void setVec4(UniformName name, float *f);
+    
 	int16 passes();
 
 	static void disable();
@@ -133,5 +141,7 @@ public:
 class InfoTree;
 void parse_mml_opengl_shader(const InfoTree& root);
 void reset_mml_opengl_shader();
+
+Shader* lastEnabledShader();
 
 #endif

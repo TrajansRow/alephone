@@ -269,18 +269,18 @@
 			<string></string>
 		</dict>
 		<dict>
-			<key>LSTypeIsPackage</key>
-			<true/>
-			<key>CFBundleTypeName</key>
-			<string>Aleph One Scenario Folder</string>
 			<key>CFBundleTypeIconFile</key>
 			<string>folder.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Aleph One Scenario Folder</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>public.directory</string>
 			</array>
+			<key>LSTypeIsPackage</key>
+			<true/>
 			<key>NSDocumentClass</key>
 			<string></string>
 		</dict>
