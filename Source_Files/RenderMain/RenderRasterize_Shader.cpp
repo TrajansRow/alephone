@@ -648,6 +648,17 @@ void RenderRasterize_Shader::render_node_floor_or_ceiling(clipping_window_data *
 		glVertexPointer(3, GL_FLOAT, 0, vertex_array);
 		glTexCoordPointer(2, GL_FLOAT, 0, texcoord_array);
 
+        Shader* lastShader = lastEnabledShader();
+        if (lastShader) {
+          float plane0[4], plane1[4], plane5[4];
+          MatrixStack::Instance()->getPlanev(0, plane0);
+          MatrixStack::Instance()->getPlanev(1, plane1);
+          MatrixStack::Instance()->getPlanev(5, plane5);
+          lastShader->setVec4(Shader::U_ClipPlane0, plane0);
+          lastShader->setVec4(Shader::U_ClipPlane1, plane1);
+          lastShader->setVec4(Shader::U_ClipPlane5, plane5);
+        }
+        
 		glDrawArrays(GL_POLYGON, 0, vertex_count);
 
 		// see note 2 above; pulsate uniform should stay set from setupWall call
@@ -761,6 +772,17 @@ void RenderRasterize_Shader::render_node_side(clipping_window_data *window, vert
 			glVertexPointer(3, GL_FLOAT, 0, vertex_array);
 			glTexCoordPointer(2, GL_FLOAT, 0, texcoord_array);
 			
+            Shader* lastShader = lastEnabledShader();
+            if (lastShader) {
+              float plane0[4], plane1[4], plane5[4];
+              MatrixStack::Instance()->getPlanev(0, plane0);
+              MatrixStack::Instance()->getPlanev(1, plane1);
+              MatrixStack::Instance()->getPlanev(5, plane5);
+              lastShader->setVec4(Shader::U_ClipPlane0, plane0);
+              lastShader->setVec4(Shader::U_ClipPlane1, plane1);
+              lastShader->setVec4(Shader::U_ClipPlane5, plane5);
+            }
+            
 			glDrawArrays(GL_QUADS, 0, vertex_count);
 
 			if (setupGlow(view, TMgr, wobble, intensity, weaponFlare, selfLuminosity, offset, renderStep)) {
