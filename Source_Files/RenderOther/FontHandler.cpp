@@ -40,6 +40,8 @@ Jan 12, 2001 (Loren Petrich):
 #include "OGL_Headers.h"
 #include "OGL_Blitter.h"
 #include "OGL_Render.h"
+#include "OGL_Shader.h"
+#include "MatrixStack.hpp"
 #endif
 
 #include <math.h>
@@ -164,6 +166,10 @@ int FontSpecifier::TextWidth(const char *text)
 }
 
 #ifdef HAVE_OPENGL
+
+// DJB OpenGL Pad is always 1.0!
+const GLfloat PadCache = 1.0;
+
 // Reset the OpenGL fonts; its arg indicates whether this is for starting an OpenGL session
 // (this is to avoid texture and display-list memory leaks and other such things)
 void FontSpecifier::OGL_Reset(bool IsStarting)
@@ -173,7 +179,6 @@ void FontSpecifier::OGL_Reset(bool IsStarting)
 	if (!IsStarting && OGL_Texture)
 	{
 		glDeleteTextures(1,&TxtrID);
-		glDeleteLists(DispList,256);
 		OGL_Deregister(this);
 	}
 
@@ -295,7 +300,6 @@ void FontSpecifier::OGL_Reset(bool IsStarting)
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	
  	// Allocate and create display lists of rendering commands
- 	DispList = glGenLists(256);
  	GLfloat TWidNorm = GLfloat(1)/TxtrWidth;
  	GLfloat THtNorm = GLfloat(1)/TxtrHeight;
  	for (int k=0; k<=LastLine; k++)
@@ -311,19 +315,39 @@ void FontSpecifier::OGL_Reset(bool IsStarting)
  			GLfloat Left = TWidNorm*Pos;
  			GLfloat Right = TWidNorm*NewPos;
  			
- 			glNewList(DispList + Which, GL_COMPILE);
+ 			//glNewList(DispList + Which, GL_COMPILE);
  			
  			// Move to the current glyph's (padded) position
- 			glTranslatef(-Pad,0,0);
+ 			//glTranslatef(-Pad,0,0);
  			
+            //Cache the glyph rectangle
+            VertexCache[Which*8 + 0] = 0;
+            VertexCache[Which*8 + 1] = -ascent_p;
+            VertexCache[Which*8 + 2] = Width;
+            VertexCache[Which*8 + 3] = -ascent_p;
+            VertexCache[Which*8 + 4] = Width;
+            VertexCache[Which*8 + 5] = descent_p;
+            VertexCache[Which*8 + 6] = 0;
+            VertexCache[Which*8 + 7] = descent_p;
+            // Setup the texture coordinates
+            TextureCache[Which*8 + 0] = Left;
+            TextureCache[Which*8 + 1] = Top;
+            TextureCache[Which*8 + 2] = Right;
+            TextureCache[Which*8 + 3] = Top;
+            TextureCache[Which*8 + 4] = Right;
+            TextureCache[Which*8 + 5] = Bottom;
+            TextureCache[Which*8 + 6] = Left;
+            TextureCache[Which*8 + 7] = Bottom;
+            WidthCache[Which] = Width;
+
  			// Draw the glyph rectangle
-			OGL_RenderTexturedRect(0, -ascent_p, Width, descent_p + ascent_p,
-								   Left, Top, Right, Bottom);
+			//OGL_RenderTexturedRect(0, -ascent_p, Width, descent_p + ascent_p,
+			//					   Left, Top, Right, Bottom);
 			
 			// Move to the next glyph's position
-			glTranslated(Width-Pad,0,0);
+			//glTranslated(Width-Pad,0,0);
 			
- 			glEndList();
+ 			//glEndList();
  			
  			// For next one
  			Pos = NewPos;
@@ -339,6 +363,13 @@ void FontSpecifier::OGL_Reset(bool IsStarting)
 // One can surround it with glPushMatrix() and glPopMatrix() to remember the original.
 void FontSpecifier::OGL_Render(const char *Text)
 {
+    Shader *previousShader = NULL;
+    Shader *textShader = NULL;
+    
+    previousShader = lastEnabledShader();
+    textShader = Shader::get(Shader::S_Rect);
+    textShader->enable();
+    
 	// Bug out if no texture to render
 	if (!OGL_Texture)
 	{
@@ -346,8 +377,13 @@ void FontSpecifier::OGL_Render(const char *Text)
         if (!OGL_Texture) return;
 	}
 	
-	glPushAttrib(GL_ENABLE_BIT);
+	//glPushAttrib(GL_ENABLE_BIT);
 	
+        //Save and restore state without push/pop attributes.
+    bool isEnabled_GT2 = glIsEnabled ( GL_TEXTURE_2D );
+    bool isEnabled_GB = glIsEnabled ( GL_BLEND );
+    bool isEnabled_GAT = glIsEnabled ( GL_ALPHA_TEST );
+    
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glDisable(GL_ALPHA_TEST);
@@ -355,14 +391,47 @@ void FontSpecifier::OGL_Render(const char *Text)
 
 	glBindTexture(GL_TEXTURE_2D,TxtrID);
 	
+    glVertexAttribPointer(Shader::ATTRIB_VERTEX, 2, GL_SHORT, GL_FALSE, 0, VertexCache);
+    glEnableVertexAttribArray(Shader::ATTRIB_VERTEX);
+    glVertexAttribPointer(Shader::ATTRIB_TEXCOORDS, 2, GL_FLOAT, 0, 0, TextureCache);
+    glEnableVertexAttribArray(Shader::ATTRIB_TEXCOORDS);
+
+
+    
 	size_t Len = MIN(strlen(Text),255);
 	for (size_t k=0; k<Len; k++)
 	{
 		unsigned char c = Text[k];
-		glCallList(DispList+c);
+		
+        // DJB OpenGL Rather than call the list, just render here glCallList(DispList+c);
+        MatrixStack::Instance()->translatef(-PadCache,0,0);
+        
+        //Set shader uniforms, etc.
+        Shader* lastShader = lastEnabledShader();
+        if (lastShader) {
+            GLfloat modelProjection[16], textureMatrix[16];
+            MatrixStack::Instance()->getFloatv(MS_TEXTURE, textureMatrix);
+            MatrixStack::Instance()->getFloatvModelviewProjection(modelProjection);
+            
+            lastShader->setMatrix4(Shader::U_ModelViewProjectionMatrix, modelProjection);
+            lastShader->setMatrix4(Shader::U_TextureMatrix, textureMatrix);
+            lastShader->setVec4(Shader::U_Color, MatrixStack::Instance()->color());
+          }
+        
+        glDrawArrays(GL_TRIANGLE_FAN, c*4, 4);
+        
+        MatrixStack::Instance()->translatef(WidthCache[c]-PadCache,0,0);
+        
+        //glCallList(DispList+c);
 	}
 	
-	glPopAttrib();
+	//glPopAttrib();
+    if ( isEnabled_GT2 ) { glEnable ( GL_TEXTURE_2D ); } else { glDisable ( GL_TEXTURE_2D ); }
+    if ( isEnabled_GB ) { glEnable ( GL_BLEND ); } else { glDisable ( GL_BLEND ); }
+    if ( isEnabled_GAT ) { glEnable ( GL_ALPHA_TEST ); } else { glDisable ( GL_ALPHA_TEST ); }
+    
+    //Restore original shader
+    if(previousShader) { previousShader->enable(); }
 }
 
 
@@ -449,11 +518,11 @@ void FontSpecifier::OGL_DrawText(const char *text, const screen_rectangle &r, sh
 		y = r.bottom;
 
 	// Draw text
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glTranslated(x, y, 0);
+	MSI()->matrixMode(MS_MODELVIEW);
+	MSI()->pushMatrix();
+	MSI()->translatef(x, y, 0);
 	OGL_Render(text_to_draw);
-	glPopMatrix();
+	MSI()->popMatrix();
 }
 
 void FontSpecifier::OGL_ResetFonts(bool IsStarting)
@@ -512,11 +581,11 @@ int FontSpecifier::DrawText(SDL_Surface *s, const char *text, int x, int y, uint
 	// draw into both buffers
 	for (int i = 0; i < 2; i++)
 	{
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glTranslatef(x, y, 0);
+		MSI()->matrixMode(MS_MODELVIEW);
+		MSI()->pushMatrix();
+		MSI()->translatef(x, y, 0);
 		this->OGL_Render(text);
-		glPopMatrix();
+		MSI()->popMatrix();
 		MainScreenSwap();
 	}
 	return 1;

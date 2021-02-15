@@ -90,6 +90,7 @@ public:
   void disablePlane (int index);
   void getPlanev (int index, GLfloat* params);
   
+  void color3f (GLfloat red, GLfloat green, GLfloat blue);
   void color4f (GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
   GLfloat* color();
   
@@ -137,6 +138,6 @@ private:
   GLfloat normalArray[MAX_NORMAL_ELEMENTS];
 };
 
-
+extern MatrixStack* MSI() { return MatrixStack::Instance(); } //Convenience instance access
 
 #endif /* MatrixStack_hpp */

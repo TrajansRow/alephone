@@ -63,6 +63,12 @@ public:
 		U_LogicalHeight,
 		U_PixelWidth,
 		U_PixelHeight,
+        U_ModelViewProjectionMatrix,
+        U_ModelViewMatrix,
+        U_ModelViewMatrixInverse,
+        U_TextureMatrix,
+        U_Color,
+        U_FogColor,
         U_ClipPlane0,
         U_ClipPlane1,
         U_ClipPlane2,
@@ -74,7 +80,8 @@ public:
 	};
 
 	enum ShaderType {
-		S_Blur,
+		S_Error,
+        S_Blur,
 		S_Bloom,
 		S_Landscape,
 		S_LandscapeBloom,
@@ -89,11 +96,20 @@ public:
 		S_Bump,
 		S_BumpBloom,
 		S_Gamma,
+        S_Rect,
 		NUMBER_OF_SHADER_TYPES
 	};
+    
+    enum {
+      ATTRIB_VERTEX,
+      ATTRIB_TEXCOORDS,
+      ATTRIB_NORMAL,
+      NUM_ATTRIBUTES
+    };
+    
 private:
 
-	GLhandleARB _programObj;
+	GLuint _programObj;
 	std::string _vert;
 	std::string _frag;
 	int16 _passes;
@@ -108,7 +124,7 @@ private:
 
 	GLint getUniformLocation(UniformName name) { 
 		if (_uniform_locations[name] == -1) {
-			_uniform_locations[name] = glGetUniformLocationARB(_programObj, _uniform_names[name]);
+			_uniform_locations[name] = glGetUniformLocation(_programObj, _uniform_names[name]);
 		}
 		return _uniform_locations[name];
 	}

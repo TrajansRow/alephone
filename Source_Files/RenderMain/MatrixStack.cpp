@@ -288,6 +288,10 @@ void MatrixStack::getPlanev (int index, GLfloat* params){
   }
 }
 
+void MatrixStack::color3f (GLfloat red, GLfloat green, GLfloat blue) {
+    color4f(red, green, blue, 1.0);
+}
+
 void MatrixStack::color4f (GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
   vertexColor[0] = red;
   vertexColor[1] = green;

@@ -26,6 +26,7 @@
 #include "FileHandler.h"
 #include "OGL_Setup.h"
 #include "InfoTree.h"
+#include "Logging.h"
 
 // gl_clipvertex puts Radeons into software mode on Mac
 #if (defined(__APPLE__) && defined(__MACH__))
@@ -99,6 +100,7 @@ const char* Shader::_uniform_names[NUMBER_OF_UNIFORM_LOCATIONS] =
 
 const char* Shader::_shader_names[NUMBER_OF_SHADER_TYPES] = 
 {
+    "error",
 	"blur",
 	"bloom",
 	"landscape",
@@ -184,10 +186,10 @@ void parseFile(FileSpecifier& fileSpec, std::string& s) {
 }
 
 
-GLhandleARB parseShader(const GLcharARB* str, GLenum shaderType) {
+GLuint parseShader(const GLcharARB* str, GLenum shaderType) {
 
 	GLint status;
-	GLhandleARB shader = glCreateShaderObjectARB(shaderType);
+	GLuint shader = glCreateShader(shaderType);
 
 	std::vector<const GLcharARB*> source;
 
@@ -204,26 +206,26 @@ GLhandleARB parseShader(const GLcharARB* str, GLenum shaderType) {
 	}
 	source.push_back(str);
 
-	glShaderSourceARB(shader, source.size(), &source[0], NULL);
+	glShaderSource(shader, source.size(), &source[0], NULL);
 
-	glCompileShaderARB(shader);
-	glGetObjectParameterivARB(shader, GL_OBJECT_COMPILE_STATUS_ARB, &status);
+	glCompileShader(shader);
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 
 	if(status) {
 		return shader;
 	} else {
         GLint infoLen = 0;
         glGetShaderiv((GLuint)(size_t)shader, GL_INFO_LOG_LENGTH, &infoLen);
-        
+
         if(infoLen > 1)
         {
             char* infoLog = (char*) malloc(sizeof(char) * infoLen);
             glGetShaderInfoLog((GLuint)(size_t)shader, infoLen, NULL, infoLog);
-            printf("Error compiling shader:\n%s\n", infoLog);
+            logError("Error compiling shader:\n%s\n", infoLog);
             free(infoLog);
         }
         
-		glDeleteObjectARB(shader);
+		glDeleteShader(shader);
 		return 0;
 	}
 }
@@ -280,32 +282,62 @@ void Shader::init() {
 
 	_loaded = true;
 
-	_programObj = glCreateProgramObjectARB();
+	_programObj = glCreateProgram();
 
 	assert(!_vert.empty());
-	GLhandleARB vertexShader = parseShader(_vert.c_str(), GL_VERTEX_SHADER_ARB);
-	assert(vertexShader);
-	glAttachObjectARB(_programObj, vertexShader);
-	glDeleteObjectARB(vertexShader);
+	GLuint vertexShader = parseShader(_vert.c_str(), GL_VERTEX_SHADER_ARB);
+	
+    if(!vertexShader) {
+        _vert = defaultVertexPrograms["error"];
+        vertexShader = parseShader(_vert.c_str(), GL_VERTEX_SHADER_ARB);
+    }
+    
+	glAttachShader((GLuint)(size_t)_programObj, (GLuint)(size_t)vertexShader);
+	glDeleteShader((GLuint)(size_t)vertexShader);
 
 	assert(!_frag.empty());
-	GLhandleARB fragmentShader = parseShader(_frag.c_str(), GL_FRAGMENT_SHADER_ARB);
-	assert(fragmentShader);
-	glAttachObjectARB(_programObj, fragmentShader);
-	glDeleteObjectARB(fragmentShader);
+	GLuint fragmentShader = parseShader(_frag.c_str(), GL_FRAGMENT_SHADER_ARB);
+    
+	if(!fragmentShader) {
+        _frag = defaultFragmentPrograms["error"];
+        fragmentShader = parseShader(_frag.c_str(), GL_FRAGMENT_SHADER_ARB);
+    }
+    
+	glAttachShader((GLuint)(size_t)_programObj, (GLuint)(size_t)fragmentShader);
+	glDeleteShader((GLuint)(size_t)fragmentShader);
 	
-	glLinkProgramARB(_programObj);
+    glBindAttribLocation(_programObj, Shader::ATTRIB_VERTEX, "vPosition");
+    glBindAttribLocation(_programObj, Shader::ATTRIB_TEXCOORDS, "vTexCoord");
+    glBindAttribLocation(_programObj, Shader::ATTRIB_NORMAL, "vNormal");
+    
+	glLinkProgram(_programObj);
 
+    GLint linked;
+    glGetProgramiv((GLuint)(size_t)_programObj, GL_LINK_STATUS, &linked);
+    if(!linked)
+    {
+      GLint infoLen = 0;
+      glGetProgramiv((GLuint)(size_t)_programObj, GL_INFO_LOG_LENGTH, &infoLen);
+      if(infoLen > 1)
+      {
+        char* infoLog = (char*) malloc(sizeof(char) * infoLen);
+        glGetProgramInfoLog((GLuint)(size_t)_programObj, infoLen, NULL, infoLog);
+        logError("Error linking program:\n%s\n", infoLog);
+        free(infoLog);
+      }
+      glDeleteProgram((GLuint)(size_t)_programObj);
+    }
+    
 	assert(_programObj);
 
-	glUseProgramObjectARB(_programObj);
+	glUseProgram(_programObj);
 
-	glUniform1iARB(getUniformLocation(U_Texture0), 0);
-	glUniform1iARB(getUniformLocation(U_Texture1), 1);
-	glUniform1iARB(getUniformLocation(U_Texture2), 2);
-	glUniform1iARB(getUniformLocation(U_Texture3), 3);	
+	glUniform1i(getUniformLocation(U_Texture0), 0);
+	glUniform1i(getUniformLocation(U_Texture1), 1);
+	glUniform1i(getUniformLocation(U_Texture2), 2);
+	glUniform1i(getUniformLocation(U_Texture3), 3);
 
-	glUseProgramObjectARB(0);
+	glUseProgram(0);
 
 //	assert(glGetError() == GL_NO_ERROR);
 }
@@ -314,13 +346,13 @@ void Shader::setFloat(UniformName name, float f) {
 
 	if (_cached_floats[name] != f) {
 		_cached_floats[name] = f;
-		glUniform1fARB(getUniformLocation(name), f);
+		glUniform1f(getUniformLocation(name), f);
 	}
 }
 
 void Shader::setMatrix4(UniformName name, float *f) {
 
-	glUniformMatrix4fvARB(getUniformLocation(name), 1, false, f);
+	glUniformMatrix4fv(getUniformLocation(name), 1, false, f);
 }
 
 void Shader::setVec4(UniformName name, float *f) {
@@ -333,13 +365,13 @@ Shader::~Shader() {
 
 void Shader::enable() {
 	if(!_loaded) { init(); }
-	glUseProgramObjectARB(_programObj);
+	glUseProgram(_programObj);
     setLastEnabledShader(this);
 }
 
 void Shader::disable() {
     setLastEnabledShader(NULL);
-	glUseProgramObjectARB(0);
+	glUseProgram(0);
 }
 
 void Shader::unload() {
@@ -347,7 +379,8 @@ void Shader::unload() {
         if(lastEnabledShader() == this) {
             setLastEnabledShader(NULL);
         }
-		glDeleteObjectARB(_programObj);
+		glDeleteProgram(_programObj);
+        glUseProgram(0);
 		_programObj = 0;
 		_loaded = false;
 	}
@@ -361,6 +394,30 @@ void initDefaultPrograms() {
     if (defaultVertexPrograms.size() > 0)
         return;
     
+    defaultVertexPrograms["error"] = ""
+    "varying vec4 vertexColor;\n"
+    "void main(void) {\n"
+    "    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
+    "    vertexColor = vec4(1.0, 1.0, 0.0, 1.0);\n"
+    "}\n";
+    defaultFragmentPrograms["error"] = ""
+    "float round(float n){ \n"
+    "   float nSign = 1.0; \n"
+    "   if ( n < 0.0 ) { nSign = -1.0; }; \n"
+    "   return nSign * floor(abs(n)+0.5); \n"
+    "} \n"
+    "void main (void) {\n"
+    "    gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);\n"
+    "    float checkerSize = 8.0;\n"
+    "    float phase = 0.0;\n"
+    "    if( mod(round(gl_FragCoord.y / checkerSize), 2.0) == 0.0) {\n"
+    "       phase = checkerSize;\n"
+    "    }\n"
+    "    if (mod(round((gl_FragCoord.x + phase) / checkerSize), 2.0)==0.0) {\n"
+    "       gl_FragColor.a = 0.5;\n"
+    "    }\n"
+    "}\n";
+
 	defaultVertexPrograms["gamma"] = ""
 	"varying vec4 vertexColor;\n"
 	"void main(void) {\n"
@@ -376,6 +433,32 @@ void initDefaultPrograms() {
 	"	gl_FragColor = vec4(pow(color0.r, gammaAdjust), pow(color0.g, gammaAdjust), pow(color0.b, gammaAdjust), 1.0);\n"
 	"}\n";
 	
+    defaultVertexPrograms["rect"] = ""
+      "uniform mat4 MS_ModelViewProjectionMatrix;\n"
+      "uniform mat4 MS_TextureMatrix;\n"
+      "uniform vec4 vColor;\n"
+      "attribute vec4 vPosition;   \n"
+      "attribute vec2 vTexCoord;   \n"
+      "varying vec2 textureUV;   \n"
+      "varying vec4 vertexColor;\n"
+      "void main()                 \n"
+      "{                           \n"
+      "  vec4 UV4 = vec4(vTexCoord.x, vTexCoord.y, 0.0, 1.0);\n"
+      "  textureUV = (MS_TextureMatrix * UV4).xy;\n"
+      "  vertexColor = vColor;\n"
+      "  gl_Position = MS_ModelViewProjectionMatrix * vPosition;  \n"
+      "} \n";
+    
+      defaultFragmentPrograms["rect"] = ""
+      "precision highp float;\n"
+      "varying highp vec2 textureUV; \n"
+      "varying vec4 vertexColor;\n"
+      "uniform highp sampler2D texture0;\n"
+      "void main()                                \n"
+      "{                                          \n"
+      "gl_FragColor = texture(texture0, textureUV.xy) * vertexColor;\n"
+      "} \n";
+    
     defaultVertexPrograms["blur"] = ""
         "varying vec4 vertexColor;\n"
         "void main(void) {\n"

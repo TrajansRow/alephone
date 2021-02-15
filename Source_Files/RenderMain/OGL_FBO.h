@@ -35,7 +35,8 @@ private:
 	GLuint _fbo;
 	GLuint _depthBuffer;
 	static std::vector<FBO *> active_chain;
-	
+	GLint viewportCache[4];
+    
 public:
 	GLuint _w;
 	GLuint _h;

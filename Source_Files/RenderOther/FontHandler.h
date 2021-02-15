@@ -110,6 +110,12 @@ public:
 	static void OGL_Register(FontSpecifier *F);
 	static void OGL_Deregister(FontSpecifier *F);
 	
+    // DJB OpenGL Caching Text information, but could use VBO in the future...
+    // No need to use a pad cache, it's always 1!
+    GLfloat WidthCache[256];
+    GLfloat TextureCache[256*8];
+    GLshort VertexCache[256*8];
+    
 #endif
 
 	// Draw text without worrying about OpenGL vs. SDL mode.
@@ -134,7 +140,6 @@ public:
 	short TxtrWidth, TxtrHeight;
 	int GetTxtrSize() {return int(TxtrWidth)*int(TxtrHeight);}
 	GLuint TxtrID;
-	uint32 DispList;
 	static std::set<FontSpecifier*> *m_font_registry;
 #endif
 };

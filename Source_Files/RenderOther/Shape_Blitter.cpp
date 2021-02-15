@@ -140,10 +140,10 @@ void Shape_Blitter::OGL_Draw(const Image_Rect& dst)
 		return;
     
 	// Get dimensions
-	GLdouble U_Scale = TMgr.U_Scale;
-	GLdouble V_Scale = TMgr.V_Scale;
-	GLdouble U_Offset = TMgr.U_Offset;
-	GLdouble V_Offset = TMgr.V_Offset;
+	GLfloat U_Scale = TMgr.U_Scale;
+	GLfloat V_Scale = TMgr.V_Scale;
+	GLfloat U_Offset = TMgr.U_Offset;
+	GLfloat V_Offset = TMgr.V_Offset;
     
 	// Draw shape
 	if (Wanting_sRGB && TMgr.TextureType != OGL_Txtr_WeaponsInHand)
@@ -161,11 +161,11 @@ void Shape_Blitter::OGL_Draw(const Image_Rect& dst)
     bool rotating = (rotation > 0.1 || rotation < -0.1);
 	if (rotating)
 	{
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glTranslatef((dst.x + dst.w/2.0), (dst.y + dst.h/2.0), 0.0);
-		glRotatef(rotation, 0.0, 0.0, 1.0);
-		glTranslatef(-(dst.x + dst.w/2.0), -(dst.y + dst.h/2.0), 0.0);
+		MSI()->matrixMode(MS_MODELVIEW);
+		MSI()->pushMatrix();
+		MSI()->translatef((dst.x + dst.w/2.0), (dst.y + dst.h/2.0), 0.0);
+		MSI()->rotatef(rotation, 0.0, 0.0, 1.0);
+		MSI()->translatef(-(dst.x + dst.w/2.0), -(dst.y + dst.h/2.0), 0.0);
 	}
 
     if (m_type == Shape_Texture_Interface)
@@ -244,7 +244,7 @@ void Shape_Blitter::OGL_Draw(const Image_Rect& dst)
 	}
     
     if (rotating)
-        glPopMatrix();
+        MSI()->popMatrix();
     
 	if (TMgr.IsGlowMapped()) TMgr.RenderGlowing();
 	TMgr.RestoreTextureMatrix();
