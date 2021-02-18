@@ -1200,8 +1200,10 @@ uint32 *TextureManager::Shrink(uint32 *Buffer)
 {
 	int NumPixels = int(LoadedWidth)*int(LoadedHeight);
 	GLuint *NewBuffer = new GLuint[NumPixels];
-	gluScaleImage(GL_RGBA, TxtrWidth, TxtrHeight, GL_UNSIGNED_BYTE, Buffer,
-		LoadedWidth, LoadedHeight, GL_UNSIGNED_BYTE, NewBuffer);
+    
+    //gluScaleImage is deprecated. I hope nothing needs this...
+	/*gluScaleImage(GL_RGBA, TxtrWidth, TxtrHeight, GL_UNSIGNED_BYTE, Buffer,
+		LoadedWidth, LoadedHeight, GL_UNSIGNED_BYTE, NewBuffer);*/
 	
 	return (uint32 *)NewBuffer;
 }
@@ -1304,7 +1306,17 @@ void TextureManager::PlaceTexture(const ImageDescriptor *Image, bool normal_map)
 			} else 
 #endif
 			{
-				gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, Image->GetWidth(), Image->GetHeight(), GL_RGBA, GL_UNSIGNED_BYTE, Image->GetBuffer());
+				//gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, Image->GetWidth(), Image->GetHeight(), GL_RGBA, GL_UNSIGNED_BYTE, Image->GetBuffer());
+                
+                glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+                // OpenGL GL_RGBA is 6407 and GL_RGB is 6408
+                assert ( internalFormat == GL_RGBA );
+                glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+                             Image->GetWidth(),
+                             Image->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                             Image->GetBuffer());
+
+                glGenerateMipmap(GL_TEXTURE_2D);
 			}
 			mipmapsLoaded = true;
 			}
@@ -1684,8 +1696,19 @@ void LoadModelSkin(ImageDescriptor& SkinImage, short Collection, short CLUT)
 				else
 #endif
 				{
-					gluBuild2DMipmaps(GL_TEXTURE_2D, TxtrTypeInfo.ColorFormat, LoadedWidth, LoadedHeight,
-							  GL_RGBA, GL_UNSIGNED_BYTE, Image.get()->GetBuffer());
+					/*gluBuild2DMipmaps(GL_TEXTURE_2D, TxtrTypeInfo.ColorFormat, LoadedWidth, LoadedHeight,
+							  GL_RGBA, GL_UNSIGNED_BYTE, Image.get()->GetBuffer());*/
+                    
+                    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+                    // OpenGL GL_RGBA is 6407 and GL_RGB is 6408
+                    assert ( internalFormat == GL_RGBA );
+                    glTexImage2D(GL_TEXTURE_2D, 0, TxtrTypeInfo.ColorFormat,
+                                 LoadedWidth,
+                                 LoadedHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                                 Image.get()->GetBuffer());
+
+                    glGenerateMipmap(GL_TEXTURE_2D);
+                    
 				}
 				mipmapsLoaded = true;
 			}

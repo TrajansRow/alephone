@@ -359,14 +359,6 @@
 		3D22CF890FD86EAE00B17822 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D22CF880FD86EAE00B17822 /* AudioUnit.framework */; };
 		3D22CF8D0FD86EBD00B17822 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D22CF8C0FD86EBD00B17822 /* libz.tbd */; };
 		3D22CFAC0FD8707C00B17822 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D22CFAB0FD8707C00B17822 /* CoreAudio.framework */; };
-		5166685225D4E3F70018E5FF /* libEGL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5166685125D4E3F70018E5FF /* libEGL.dylib */; };
-		5166685325D4E3F70018E5FF /* libEGL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5166685125D4E3F70018E5FF /* libEGL.dylib */; };
-		5166685425D4E3F70018E5FF /* libEGL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5166685125D4E3F70018E5FF /* libEGL.dylib */; };
-		5166685525D4E3F70018E5FF /* libEGL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5166685125D4E3F70018E5FF /* libEGL.dylib */; };
-		5166685725D4E4020018E5FF /* libGLESv2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5166685625D4E4020018E5FF /* libGLESv2.dylib */; };
-		5166685825D4E4020018E5FF /* libGLESv2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5166685625D4E4020018E5FF /* libGLESv2.dylib */; };
-		5166685925D4E4020018E5FF /* libGLESv2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5166685625D4E4020018E5FF /* libGLESv2.dylib */; };
-		5166685A25D4E4020018E5FF /* libGLESv2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5166685625D4E4020018E5FF /* libGLESv2.dylib */; };
 		51AF6959256A2272003620C7 /* MatrixStack.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 51AF6957256A2271003620C7 /* MatrixStack.hpp */; };
 		51AF695A256A2272003620C7 /* MatrixStack.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 51AF6957256A2271003620C7 /* MatrixStack.hpp */; };
 		51AF695B256A2272003620C7 /* MatrixStack.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 51AF6957256A2271003620C7 /* MatrixStack.hpp */; };
@@ -375,6 +367,10 @@
 		51AF695E256A2272003620C7 /* MatrixStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51AF6958256A2271003620C7 /* MatrixStack.cpp */; };
 		51AF695F256A2272003620C7 /* MatrixStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51AF6958256A2271003620C7 /* MatrixStack.cpp */; };
 		51AF6960256A2272003620C7 /* MatrixStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51AF6958256A2271003620C7 /* MatrixStack.cpp */; };
+		51D11B3425DE17ED00115618 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51D11B3325DE17EC00115618 /* MetalANGLE.framework */; };
+		51D11B3525DE17ED00115618 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51D11B3325DE17EC00115618 /* MetalANGLE.framework */; };
+		51D11B3625DE17ED00115618 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51D11B3325DE17EC00115618 /* MetalANGLE.framework */; };
+		51D11B3725DE17ED00115618 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51D11B3325DE17EC00115618 /* MetalANGLE.framework */; };
 		553AB9F6213A034300EE3861 /* libexpat.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 553AB9F5213A034300EE3861 /* libexpat.tbd */; };
 		553AB9F7213A035000EE3861 /* libexpat.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 553AB9F5213A034300EE3861 /* libexpat.tbd */; };
 		553AB9F9213A035000EE3861 /* libexpat.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 553AB9F5213A034300EE3861 /* libexpat.tbd */; };
@@ -2218,10 +2214,9 @@
 		3DF290E9046F5BED00000104 /* OGL_Texture_Def.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OGL_Texture_Def.h; sourceTree = "<group>"; };
 		3DF290EF046F5C5B00000104 /* OGL_Model_Def.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = OGL_Model_Def.cpp; sourceTree = "<group>"; };
 		3DF290F0046F5C5B00000104 /* OGL_Subst_Texture_Def.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = OGL_Subst_Texture_Def.cpp; sourceTree = "<group>"; usesTabs = 1; };
-		5166685125D4E3F70018E5FF /* libEGL.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libEGL.dylib; path = ../../ANGLE/libEGL.dylib; sourceTree = "<group>"; };
-		5166685625D4E4020018E5FF /* libGLESv2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLESv2.dylib; path = ../../ANGLE/libGLESv2.dylib; sourceTree = "<group>"; };
 		51AF6957256A2271003620C7 /* MatrixStack.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MatrixStack.hpp; sourceTree = "<group>"; };
 		51AF6958256A2271003620C7 /* MatrixStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixStack.cpp; sourceTree = "<group>"; };
+		51D11B3325DE17EC00115618 /* MetalANGLE.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MetalANGLE.framework; sourceTree = "<group>"; };
 		553AB9F5213A034300EE3861 /* libexpat.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libexpat.tbd; path = usr/lib/libexpat.tbd; sourceTree = SDKROOT; };
 		AE0053ED0ABE16300038507F /* OGL_Blitter.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = OGL_Blitter.cpp; sourceTree = "<group>"; };
 		AE005FD30EE2D6DE007FE7C6 /* screen.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = screen.cpp; sourceTree = "<group>"; };
@@ -2664,6 +2659,7 @@
 				2762A3391AAA51D900B807D4 /* boost_system.framework in Frameworks */,
 				AE505CFC141D45E600915344 /* libz.tbd in Frameworks */,
 				2748BDC61CC405030082F0E1 /* SDL2.framework in Frameworks */,
+				51D11B3625DE17ED00115618 /* MetalANGLE.framework in Frameworks */,
 				AE505CFD141D45E600915344 /* CoreAudio.framework in Frameworks */,
 				AE505CFE141D45E600915344 /* zziplib.framework in Frameworks */,
 				553AB9F9213A035000EE3861 /* libexpat.tbd in Frameworks */,
@@ -2675,10 +2671,8 @@
 				2748BDD81CC405140082F0E1 /* SDL2_image.framework in Frameworks */,
 				2748BDD21CC4050F0082F0E1 /* SDL2_net.framework in Frameworks */,
 				270F9FD6177687B7009AAE10 /* avformat.framework in Frameworks */,
-				5166685425D4E3F70018E5FF /* libEGL.dylib in Frameworks */,
 				270F9FDA177687B7009AAE10 /* avutil.framework in Frameworks */,
 				270F9FDE177687B7009AAE10 /* swscale.framework in Frameworks */,
-				5166685925D4E4020018E5FF /* libGLESv2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2696,6 +2690,7 @@
 				2762A33A1AAA51D900B807D4 /* boost_system.framework in Frameworks */,
 				AEB4A29E14296CAE00537AE7 /* libz.tbd in Frameworks */,
 				2748BDC71CC405040082F0E1 /* SDL2.framework in Frameworks */,
+				51D11B3725DE17ED00115618 /* MetalANGLE.framework in Frameworks */,
 				AEB4A29F14296CAE00537AE7 /* CoreAudio.framework in Frameworks */,
 				AEB4A2A014296CAE00537AE7 /* zziplib.framework in Frameworks */,
 				553AB9F7213A035000EE3861 /* libexpat.tbd in Frameworks */,
@@ -2707,10 +2702,8 @@
 				2748BDD91CC405140082F0E1 /* SDL2_image.framework in Frameworks */,
 				2748BDD31CC4050F0082F0E1 /* SDL2_net.framework in Frameworks */,
 				270F9FD7177687B7009AAE10 /* avformat.framework in Frameworks */,
-				5166685525D4E3F70018E5FF /* libEGL.dylib in Frameworks */,
 				270F9FDB177687B7009AAE10 /* avutil.framework in Frameworks */,
 				270F9FDF177687B7009AAE10 /* swscale.framework in Frameworks */,
-				5166685A25D4E4020018E5FF /* libGLESv2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2728,6 +2721,7 @@
 				3D22CF890FD86EAE00B17822 /* AudioUnit.framework in Frameworks */,
 				2762A3371AAA51D900B807D4 /* boost_system.framework in Frameworks */,
 				3D22CF8D0FD86EBD00B17822 /* libz.tbd in Frameworks */,
+				51D11B3425DE17ED00115618 /* MetalANGLE.framework in Frameworks */,
 				3D22CFAC0FD8707C00B17822 /* CoreAudio.framework in Frameworks */,
 				2759F33010D5BCC0000204DD /* zziplib.framework in Frameworks */,
 				2759FB1F10D7114D000204DD /* jpeg.framework in Frameworks */,
@@ -2739,10 +2733,8 @@
 				27E5DD601BD2DA0C00A95619 /* SDL2_net.framework in Frameworks */,
 				270F9FD8177687B7009AAE10 /* avutil.framework in Frameworks */,
 				270F9FDC177687B7009AAE10 /* swscale.framework in Frameworks */,
-				5166685225D4E3F70018E5FF /* libEGL.dylib in Frameworks */,
 				27E5DD611BD2DA0C00A95619 /* SDL2_ttf.framework in Frameworks */,
 				27E5DD5F1BD2DA0C00A95619 /* SDL2_image.framework in Frameworks */,
-				5166685725D4E4020018E5FF /* libGLESv2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2760,6 +2752,7 @@
 				2762A3381AAA51D900B807D4 /* boost_system.framework in Frameworks */,
 				AEFD87A813EB84CF00C1E687 /* libz.tbd in Frameworks */,
 				2748BDC51CC405030082F0E1 /* SDL2.framework in Frameworks */,
+				51D11B3525DE17ED00115618 /* MetalANGLE.framework in Frameworks */,
 				AEFD87A913EB84CF00C1E687 /* CoreAudio.framework in Frameworks */,
 				AEFD87AA13EB84CF00C1E687 /* zziplib.framework in Frameworks */,
 				553AB9FB213A035000EE3861 /* libexpat.tbd in Frameworks */,
@@ -2771,10 +2764,8 @@
 				2748BDD71CC405130082F0E1 /* SDL2_image.framework in Frameworks */,
 				2748BDD11CC4050E0082F0E1 /* SDL2_net.framework in Frameworks */,
 				270F9FD5177687B7009AAE10 /* avformat.framework in Frameworks */,
-				5166685325D4E3F70018E5FF /* libEGL.dylib in Frameworks */,
 				270F9FD9177687B7009AAE10 /* avutil.framework in Frameworks */,
 				270F9FDD177687B7009AAE10 /* swscale.framework in Frameworks */,
-				5166685825D4E4020018E5FF /* libGLESv2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2818,7 +2809,6 @@
 				AEA85F5524DF276600BB7827 /* Marathon 2.entitlements */,
 				AEA85F5424DF275300BB7827 /* Marathon.entitlements */,
 				AEA85F5324DF26F800BB7827 /* Aleph One.entitlements */,
-				5166685025D4E3D30018E5FF /* Dylib */,
 				F52214490136C0C401000001 /* Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				EF2EF5B004819A5C00A8000D /* Frameworks */,
@@ -2905,15 +2895,6 @@
 			name = TCPMess;
 			path = ../Source_Files/TCPMess;
 			sourceTree = SOURCE_ROOT;
-		};
-		5166685025D4E3D30018E5FF /* Dylib */ = {
-			isa = PBXGroup;
-			children = (
-				5166685125D4E3F70018E5FF /* libEGL.dylib */,
-				5166685625D4E4020018E5FF /* libGLESv2.dylib */,
-			);
-			path = Dylib;
-			sourceTree = "<group>";
 		};
 		AE0E4EC0141D144000AAA02F /* Marathon */ = {
 			isa = PBXGroup;
@@ -3052,6 +3033,7 @@
 		EF2EF5B004819A5C00A8000D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				51D11B3325DE17EC00115618 /* MetalANGLE.framework */,
 				AEA85F4A24DF251300BB7827 /* webp.framework */,
 				27E5DD5B1BD2DA0C00A95619 /* SDL2_image.framework */,
 				27E5DD5C1BD2DA0C00A95619 /* SDL2_net.framework */,
@@ -6024,7 +6006,7 @@
 					"\"$(SRCROOT)/../Source_Files/Khronos\"",
 				);
 				INFOPLIST_FILE = "Info-AlephOne-Xcode4.plist";
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../ANGLE\"";
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../angle/out/Release\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.swirlingvortex.alephone;
 				PRODUCT_NAME = "Aleph One";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -6187,7 +6169,7 @@
 					"\"$(SRCROOT)/../Source_Files/Khronos\"",
 				);
 				INFOPLIST_FILE = "Info-AlephOne-Xcode4.plist";
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../ANGLE\"";
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../angle/out/Release\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.swirlingvortex.alephone;
 				PRODUCT_NAME = "Aleph One";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -6433,7 +6415,7 @@
 					"\"$(SRCROOT)/../Source_Files/Khronos\"",
 				);
 				INFOPLIST_FILE = "Info-AlephOne-Xcode4.plist";
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../ANGLE\"";
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../angle/out/Release\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.swirlingvortex.alephone;
 				PRODUCT_NAME = "Aleph One";
 				PROVISIONING_PROFILE_SPECIFIER = "";

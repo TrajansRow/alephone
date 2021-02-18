@@ -330,3 +330,7 @@ GLfloat* MatrixStack::fog() {
 GLfloat* MatrixStack::normals() {
   return normalArray;
 }
+
+MatrixStack* MSI() {
+    return MatrixStack::Instance();
+}

@@ -138,6 +138,6 @@ private:
   GLfloat normalArray[MAX_NORMAL_ELEMENTS];
 };
 
-extern MatrixStack* MSI() { return MatrixStack::Instance(); } //Convenience instance access
+MatrixStack* MSI(); //Convenience instance access
 
 #endif /* MatrixStack_hpp */
