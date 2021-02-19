@@ -3098,11 +3098,51 @@ void OGL_RenderRect(const SDL_Rect& rect)
 
 void OGL_RenderTexturedRect(float x, float y, float w, float h, float tleft, float ttop, float tright, float tbottom)
 {	
-	GLfloat vertices[8] = { x, y, x + w, y, x + w, y + h, x, y + h };
+//	GLfloat vertices[8] = { x, y, x + w, y, x + w, y + h, x, y + h };
+    GLfloat vertices[12] = { x, y, 0,
+                               x + w, y, 0,
+                               x + w, y + h, 0,
+                               x, y + h, 0};
 	GLfloat texcoords[8] = { tleft, ttop, tright, ttop, tright, tbottom, tleft, tbottom };
-    glVertexPointer(2, GL_FLOAT, 0, vertices);
+    
+    GLubyte indices[] =    {0,1,2,
+                            0,2,3};
+    
+    Shader* previousShader = lastEnabledShader();
+    
+    //Enable shader, if needed
+    Shader* s_plain_rect = NULL;
+    s_plain_rect = Shader::get(Shader::S_PlainRect);
+    s_plain_rect->enable();
+    
+    MatrixStack::Instance()->transformVertex(vertices[0], vertices[1], vertices[2]);
+    MatrixStack::Instance()->transformVertex(vertices[3], vertices[4], vertices[5]);
+    MatrixStack::Instance()->transformVertex(vertices[6], vertices[7], vertices[8]);
+    MatrixStack::Instance()->transformVertex(vertices[9], vertices[10], vertices[11]);
+        
+    s_plain_rect->setVec4(Shader::U_Color, MatrixStack::Instance()->color());
+
+    glVertexAttribPointer(Shader::ATTRIB_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+    glEnableVertexAttribArray(Shader::ATTRIB_VERTEX);
+    
+    glVertexAttribPointer(Shader::ATTRIB_TEXCOORDS, 2, GL_FLOAT, 0, 0, texcoords);
+    glEnableVertexAttribArray(Shader::ATTRIB_TEXCOORDS);
+    
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
+ 
+    glDisableVertexAttribArray(0);
+
+    /*glVertexPointer(2, GL_FLOAT, 0, vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, texcoords);
-	glDrawArrays(GL_POLYGON, 0, 4);
+	glDrawArrays(GL_POLYGON, 0, 4);*/
+    
+    Shader* s_rect = NULL;
+    s_rect = Shader::get(Shader::S_Rect);
+    s_rect->enable();
+    
+    if(previousShader) {
+      previousShader->enable();
+    }
 }
 
 void OGL_RenderTexturedRect(const SDL_Rect& rect, float tleft, float ttop, float tright, float tbottom)

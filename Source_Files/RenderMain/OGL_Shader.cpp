@@ -85,10 +85,17 @@ const char* Shader::_uniform_names[NUMBER_OF_UNIFORM_LOCATIONS] =
 	"pitch",
 	"selfLuminosity",
 	"gammaAdjust",
-	"logicalWidth",
-	"logicalHeight",
-	"pixelWidth",
-	"pixelHeight",
+    "logicalWidth",
+    "logicalHeight",
+    "pixelWidth",
+    "pixelHeight",
+    "MS_ModelViewProjectionMatrix",
+    "MS_ModelViewMatrix",
+    "MS_ModelViewMatrixInverse",
+    "MS_TextureMatrix",
+    "vColor",
+    "vFogColor",
+    "vTexCoord4",
     "clipPlane0",
     "clipPlane1",
     "clipPlane2",
@@ -115,7 +122,9 @@ const char* Shader::_shader_names[NUMBER_OF_SHADER_TYPES] =
 	"wall_bloom",
 	"bump",
 	"bump_bloom",
-	"gamma"
+	"gamma",
+    "rect",
+    "plain_rect"
 };
 
 
@@ -313,22 +322,25 @@ void Shader::init() {
 	glLinkProgram(_programObj);
 
     GLint linked;
-    glGetProgramiv((GLuint)(size_t)_programObj, GL_LINK_STATUS, &linked);
+    glGetProgramiv(_programObj, GL_LINK_STATUS, &linked);
     if(!linked)
     {
       GLint infoLen = 0;
-      glGetProgramiv((GLuint)(size_t)_programObj, GL_INFO_LOG_LENGTH, &infoLen);
+      glGetProgramiv(_programObj, GL_INFO_LOG_LENGTH, &infoLen);
       if(infoLen > 1)
       {
         char* infoLog = (char*) malloc(sizeof(char) * infoLen);
-        glGetProgramInfoLog((GLuint)(size_t)_programObj, infoLen, NULL, infoLog);
+        glGetProgramInfoLog(_programObj, infoLen, NULL, infoLog);
         logError("Error linking program:\n%s\n", infoLog);
         free(infoLog);
       }
-      glDeleteProgram((GLuint)(size_t)_programObj);
+      glDeleteProgram(_programObj);
     }
     
-	assert(_programObj);
+	//assert(_programObj);
+    if (!_programObj){
+        printf("Why is the program object zero? Huh.\n");
+    }
 
 	glUseProgram(_programObj);
 
@@ -433,6 +445,26 @@ void initDefaultPrograms() {
 	"	gl_FragColor = vec4(pow(color0.r, gammaAdjust), pow(color0.g, gammaAdjust), pow(color0.b, gammaAdjust), 1.0);\n"
 	"}\n";
 	
+    defaultVertexPrograms["plain_rect"] = ""
+      "attribute vec4 vPosition;   \n"
+      "attribute vec2 vTexCoord;   \n"
+      "varying vec2 textureUV;   \n"
+      "void main()                 \n"
+      "{                           \n"
+      "  textureUV = vTexCoord;\n"
+      "  gl_Position = vPosition;  \n"
+      "} \n";
+    
+      defaultFragmentPrograms["plain_rect"] = ""
+      "precision highp float;\n"
+      "varying highp vec2 textureUV; \n"
+      "uniform highp sampler2D texture0;\n"
+      "uniform vec4 vColor;\n"
+      "void main()                                \n"
+      "{                                          \n"
+      " gl_FragColor = texture2D(texture0, textureUV) * vColor;\n"
+      "} \n";
+    
     defaultVertexPrograms["rect"] = ""
       "uniform mat4 MS_ModelViewProjectionMatrix;\n"
       "uniform mat4 MS_TextureMatrix;\n"

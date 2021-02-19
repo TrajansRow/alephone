@@ -64,6 +64,7 @@
 #include "Logging.h"
 
 #include "sdl_fonts.h"
+#include "SDL_syswm.h"
 
 #include "lua_script.h"
 #include "lua_hud_script.h"
@@ -744,7 +745,8 @@ static bool need_mode_change(int window_width, int window_height,
 	bool wantgl = false;
 	bool hasgl = MainScreenIsOpenGL();
 #ifdef HAVE_OPENGL
-	wantgl = !nogl && (screen_mode.acceleration != _no_acceleration);
+    //Just for testing MetalANGLE
+/*	wantgl = !nogl && (screen_mode.acceleration != _no_acceleration);
 	if (wantgl != hasgl)
 		return true;
 	if (wantgl) {
@@ -761,7 +763,7 @@ static bool need_mode_change(int window_width, int window_height,
 		int has_vsync = SDL_GL_GetSwapInterval();
 		if ((has_vsync == 0) != (want_vsync == 0))
 			SDL_GL_SetSwapInterval(want_vsync);
-	}
+	}*/
 #endif
 		
 	// are we switching to/from fullscreen?
@@ -877,7 +879,8 @@ static void change_screen_mode(int width, int height, int depth, bool nogl, bool
 	
 	if (need_mode_change(sdl_width, sdl_height, vmode_width, vmode_height, depth, nogl)) {
 #ifdef HAVE_OPENGL
-	if (!nogl && screen_mode.acceleration != _no_acceleration) {
+        //Just for testing MetalANGLE
+/*	if (!nogl && screen_mode.acceleration != _no_acceleration) {
 		passed_shader = false;
 		flags |= SDL_WINDOW_OPENGL;
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -894,7 +897,7 @@ static void change_screen_mode(int width, int height, int depth, bool nogl, bool
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 		}
 		SDL_GL_SetSwapInterval(Get_OGL_ConfigureData().WaitForVSync ? 1 : 0);
-	}
+	}*/
 #endif 
 
 		
@@ -916,15 +919,21 @@ static void change_screen_mode(int width, int height, int depth, bool nogl, bool
 		main_screen = NULL;
 		SDL_FilterEvents(change_window_filter, &window_id);
 	}
+    
+    SDL_setenv("METAL_DEVICE_WRAPPER_TYPE", "1", 0); //Just for testing MetalANGLE
+        
 	main_screen = SDL_CreateWindow(get_application_name().c_str(),
 								   SDL_WINDOWPOS_CENTERED,
 								   SDL_WINDOWPOS_CENTERED,
 								   sdl_width, sdl_height,
 								   flags);
 
+   
+        
+        
 #ifdef HAVE_OPENGL
 	bool context_created = false;
-	if (main_screen == NULL && !nogl && screen_mode.acceleration != _no_acceleration && Get_OGL_ConfigureData().Multisamples > 0) {
+	/*if (main_screen == NULL && !nogl && screen_mode.acceleration != _no_acceleration && Get_OGL_ConfigureData().Multisamples > 0) {
 		// retry with multisampling off
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
@@ -935,7 +944,32 @@ static void change_screen_mode(int width, int height, int depth, bool nogl, bool
 									   flags);
 		if (main_screen)
 			failed_multisamples = Get_OGL_ConfigureData().Multisamples;
-	}
+	}*/
+        
+        //Just for testing MetalANGLE
+          //Create an unused renderer so that SDL creates the metal layer.
+        SDL_Renderer *temp_render = SDL_CreateRenderer(main_screen, -1, 0);
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+        SDL_RenderSetLogicalSize(temp_render, sdl_width, sdl_height);
+        
+        SDL_RendererInfo rendererInfo;
+        SDL_GetRendererInfo(temp_render, &rendererInfo);
+        printf("SDL renderer name: %s\n", rendererInfo.name);
+        SDL_DestroyRenderer(temp_render);
+        
+        SDL_SysWMinfo wmi;
+        SDL_VERSION(&wmi.version);
+        SDL_GetWindowWMInfo(main_screen, &wmi);
+        
+        
+        //Attach metal context to renderer here somehow?
+        
+        
+        
+        
+        context_created = TRUE;
+        
+        
 #endif
 	if (main_screen == NULL && !nogl && screen_mode.acceleration != _no_acceleration) {
 		fprintf(stderr, "WARNING: Failed to initialize OpenGL with 24 bit depth\n");
@@ -960,7 +994,8 @@ static void change_screen_mode(int width, int height, int depth, bool nogl, bool
 #ifdef __WIN32__
 		glewInit();
 #endif
-		if (!OGL_CheckExtension("GL_ARB_vertex_shader") || !OGL_CheckExtension("GL_ARB_fragment_shader") || !OGL_CheckExtension("GL_ARB_shader_objects") || !OGL_CheckExtension("GL_ARB_shading_language_100"))
+        //Just for testing MetalANGLE
+		/*if (!OGL_CheckExtension("GL_ARB_vertex_shader") || !OGL_CheckExtension("GL_ARB_fragment_shader") || !OGL_CheckExtension("GL_ARB_shader_objects") || !OGL_CheckExtension("GL_ARB_shading_language_100"))
 		{
 			logWarning("OpenGL (Shader) renderer is not available");
 			fprintf(stderr, "WARNING: Failed to initialize OpenGL renderer\n");
@@ -973,9 +1008,9 @@ static void change_screen_mode(int width, int height, int depth, bool nogl, bool
 										   flags);
 		}
 		else
-		{
+		{*/
 			passed_shader = true;
-		}
+		//}
 	}
 //#endif
 

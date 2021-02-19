@@ -90,6 +90,7 @@
 
 #ifdef HAVE_OPENGL
 #include "OGL_Headers.h"
+#include "OGL_Shader.h"
 #endif
 
 #if !defined(DISABLE_NETWORKING)
@@ -337,6 +338,10 @@ static void initialize_application(void)
 			fprintf(stderr, "Couldn't initialize SDL\n");
 		exit(1);
 	}
+    
+      //Initialize shader immediately, since it will be used for intro screen fades.
+    Shader::loadAll();
+
 #if defined(HAVE_SDL_IMAGE)
 	IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
 #endif

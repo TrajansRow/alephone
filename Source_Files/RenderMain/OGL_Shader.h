@@ -69,6 +69,7 @@ public:
         U_TextureMatrix,
         U_Color,
         U_FogColor,
+        U_TexCoords4,
         U_ClipPlane0,
         U_ClipPlane1,
         U_ClipPlane2,
@@ -97,6 +98,7 @@ public:
 		S_BumpBloom,
 		S_Gamma,
         S_Rect,
+        S_PlainRect,
 		NUMBER_OF_SHADER_TYPES
 	};
     
