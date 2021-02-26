@@ -338,9 +338,6 @@ static void initialize_application(void)
 			fprintf(stderr, "Couldn't initialize SDL\n");
 		exit(1);
 	}
-    
-      //Initialize shader immediately, since it will be used for intro screen fades.
-    Shader::loadAll();
 
 #if defined(HAVE_SDL_IMAGE)
 	IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
@@ -543,6 +540,7 @@ static void initialize_application(void)
 	initialize_joystick();
 	initialize_gamma();
 	alephone::Screen::instance()->Initialize(&graphics_preferences->screen_mode);
+    Shader::loadAll();  //Initialize shaders before they are needed for intro screen fades.
 	initialize_marathon();
 	initialize_screen_drawing();
 	initialize_dialogs();

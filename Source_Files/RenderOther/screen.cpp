@@ -39,6 +39,7 @@
 #include "OGL_Blitter.h"
 #include "OGL_Faders.h"
 #include "MatrixStack.hpp"
+#include "MetalHelper.h"
 #endif
 
 #include "world.h"
@@ -947,6 +948,10 @@ static void change_screen_mode(int width, int height, int depth, bool nogl, bool
 	}*/
         
         //Just for testing MetalANGLE
+        
+        
+        //ANGLEWindow(sdl_width, sdl_height);
+        
           //Create an unused renderer so that SDL creates the metal layer.
         SDL_Renderer *temp_render = SDL_CreateRenderer(main_screen, -1, 0);
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -964,6 +969,27 @@ static void change_screen_mode(int width, int height, int depth, bool nogl, bool
         
         //Attach metal context to renderer here somehow?
         
+        getLayerFromSDLWindow(main_screen);
+        
+            //In bgfx, we did ti like this:
+        /*bgfx::PlatformData pd;
+        pd.ndt          = NULL;
+        pd.nwh          = getLayerFromSDLWindow(main_screen);
+        pd.context      = NULL;
+        pd.backBuffer   = NULL;
+        pd.backBufferDS = NULL;
+        
+        bgfx::Init bgfxInit;
+        bgfxInit.platformData = pd;
+        bgfxInit.type = bgfx::RendererType::Metal; // Choose a renderer. Use 'Count' for automatic
+        bgfxInit.resolution.width = helperLongScreenDimension() * helperScreenScale();
+        bgfxInit.resolution.height = helperShortScreenDimension() * helperScreenScale();
+        bgfxInit.resolution.reset = BGFX_RESET_VSYNC;
+        bgfx::init(bgfxInit);*/
+        
+        
+        
+        context_created = TRUE;
         
         
         
@@ -2200,7 +2226,9 @@ bool MainScreenIsOpenGL()
 }
 void MainScreenSwap()
 {
-	SDL_GL_SwapWindow(main_screen);
+        //Just for testing MetalANGLE
+    swapWindow(main_screen);
+	//SDL_GL_SwapWindow(main_screen);
 }
 void MainScreenCenterMouse()
 {

@@ -337,10 +337,7 @@ void Shader::init() {
       glDeleteProgram(_programObj);
     }
     
-	//assert(_programObj);
-    if (!_programObj){
-        printf("Why is the program object zero? Huh.\n");
-    }
+	assert(_programObj);
 
 	glUseProgram(_programObj);
 

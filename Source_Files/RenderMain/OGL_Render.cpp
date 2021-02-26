@@ -3136,10 +3136,6 @@ void OGL_RenderTexturedRect(float x, float y, float w, float h, float tleft, flo
 	glTexCoordPointer(2, GL_FLOAT, 0, texcoords);
 	glDrawArrays(GL_POLYGON, 0, 4);*/
     
-    Shader* s_rect = NULL;
-    s_rect = Shader::get(Shader::S_Rect);
-    s_rect->enable();
-    
     if(previousShader) {
       previousShader->enable();
     }
