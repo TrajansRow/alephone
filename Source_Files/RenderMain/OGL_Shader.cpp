@@ -259,7 +259,17 @@ void Shader::unloadAll() {
 }
 
 Shader::Shader(const std::string& name) : _programObj(0), _passes(-1), _loaded(false) {
+    nameIndex = -1;
+
     initDefaultPrograms();
+    
+    //Track name index.
+    for (int i = 0; i < Shader::NUMBER_OF_SHADER_TYPES; ++i) {
+      if (name == Shader::_shader_names[i]) {
+        nameIndex = i;
+      }
+    }
+    
     if (defaultVertexPrograms.count(name) > 0) {
 	    _vert = defaultVertexPrograms[name];
     }
@@ -269,7 +279,9 @@ Shader::Shader(const std::string& name) : _programObj(0), _passes(-1), _loaded(f
 }    
 
 Shader::Shader(const std::string& name, FileSpecifier& vert, FileSpecifier& frag, int16& passes) : _programObj(0), _passes(passes), _loaded(false) {
-	initDefaultPrograms();
+    nameIndex = -1;
+    
+    initDefaultPrograms();
 	
 	parseFile(vert,  _vert);
 	if (_vert.empty() && defaultVertexPrograms.count(name) > 0) 
@@ -306,7 +318,7 @@ void Shader::init() {
 
 	assert(!_frag.empty());
 	GLuint fragmentShader = parseShader(_frag.c_str(), GL_FRAGMENT_SHADER_ARB);
-    
+    glPushGroupMarkerEXT(0, "Draw ES Quad");
 	if(!fragmentShader) {
         _frag = defaultFragmentPrograms["error"];
         fragmentShader = parseShader(_frag.c_str(), GL_FRAGMENT_SHADER_ARB);
@@ -374,8 +386,14 @@ Shader::~Shader() {
 
 void Shader::enable() {
 	if(!_loaded) { init(); }
+    if(nameIndex >=0){
+      glPushGroupMarkerEXT(0, _shader_names[nameIndex]);
+    } else {
+       glPushGroupMarkerEXT(0, "non-default shader");
+    }
 	glUseProgram(_programObj);
     setLastEnabledShader(this);
+    glPopGroupMarkerEXT();
 }
 
 void Shader::disable() {

@@ -31,6 +31,9 @@
 std::vector<FBO *> FBO::active_chain;
 
 FBO::FBO(GLuint w, GLuint h, bool srgb) : _h(h), _w(w), _srgb(srgb) {
+    setup(w, h, srgb);
+
+    /*
 	glGenFramebuffers(1, &_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 	
@@ -44,7 +47,38 @@ FBO::FBO(GLuint w, GLuint h, bool srgb) : _h(h), _w(w), _srgb(srgb) {
 	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, srgb ? GL_SRGB : GL_RGB8, _w, _h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, texID, 0);
 	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
+}
+
+void FBO::setup(GLuint w, GLuint h, bool srgb) {
+  
+  _h = h; _w = w; _srgb = srgb;
+  
+  //Do nothing if not valid size. Call again later to initialize.
+  if( w == 0 && h == 0) {
+    return;
+  }
+  
+  glGenFramebuffers(1, &_fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+  
+  //Create texture and attach it to framebuffer's color attachment point
+  glGenTextures(1, &texID);
+  glBindTexture(GL_TEXTURE_2D, texID); //DCW was GL_TEXTURE_RECTANGE
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  //DCW
+  glTexImage2D(GL_TEXTURE_2D, 0, srgb ? GL_SRGB : GL_RGBA, _w, _h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);//DCW was GL_TEXTURE_RECTANGLE, changed GL_RGB to GL_RGBA
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texID, 0); //DCW was GL_TEXTURE_RECTANGLE
+  
+  //Generate depth buffer
+  glGenRenderbuffers(1, &_depthBuffer);
+  glBindRenderbuffer(GL_RENDERBUFFER, _depthBuffer);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, _w, _h);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBuffer);
+  
+  glBindFramebuffer(GL_FRAMEBUFFER, 1);
+  glBindRenderbuffer(GL_RENDERBUFFER, 1);
+  
+  glPopGroupMarkerEXT();
 }
 
 void FBO::activate(bool clear) {

@@ -105,8 +105,8 @@ void Rasterizer_Shader_Class::SetView(view_data& view) {
 	MSI()->multMatrixf(kViewBaseMatrixInverse);
 
 	GLfloat landscapeInverseMatrix[16];
-	glGetFloatv(GL_MODELVIEW_MATRIX, landscapeInverseMatrix);
-
+    MSI()->getFloatv(MS_MODELVIEW_MATRIX, landscapeInverseMatrix);
+                     
 	Shader *s;
 
 	s = Shader::get(Shader::S_Landscape);

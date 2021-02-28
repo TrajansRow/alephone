@@ -116,6 +116,7 @@ private:
 	std::string _frag;
 	int16 _passes;
 	bool _loaded;
+    int nameIndex;
 
 	static const char* _shader_names[NUMBER_OF_SHADER_TYPES];
 	static std::vector<Shader> _shaders;
@@ -152,6 +153,10 @@ public:
     
 	int16 passes();
 
+    int getNameIndex() {
+      return nameIndex;
+    }
+    
 	static void disable();
 };
 

@@ -99,7 +99,8 @@ struct mat4 {
 	GLfloat _d[4][4];
 	
 	mat4(GLenum em) {
-		glGetFloatv(em, &(_d[0][0]) );
+		//glGetFloatv(em, &(_d[0][0]) );
+        MSI()->getFloatv(em, &(_d[0][0]) ); //Hopefully the enum maps correctly to the MSI equivalent...
 	}
 
 	vec4 operator *(const vec4& v) const {

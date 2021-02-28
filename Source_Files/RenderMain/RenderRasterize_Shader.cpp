@@ -230,13 +230,8 @@ void RenderRasterize_Shader::clip_to_window(clipping_window_data *win)
 	if (win->left.i != leftmost_clip.i || win->left.j != leftmost_clip.j) {
 		clip[0] = win->left.i;
 		clip[1] = win->left.j;
-        glGetFloatv(GL_MODELVIEW_MATRIX,mvm);
-        MatrixStack::Instance()->matrixMode(MS_MODELVIEW);
-        MatrixStack::Instance()->pushMatrix();
-        MatrixStack::Instance()->loadMatrixf(mvm);
         MatrixStack::Instance()->enablePlane(0);
         MatrixStack::Instance()->clipPlanef(0, clip);
-        MatrixStack::Instance()->popMatrix();
 	} else {
         MatrixStack::Instance()->disablePlane(0);
 	}
@@ -245,13 +240,8 @@ void RenderRasterize_Shader::clip_to_window(clipping_window_data *win)
 	if (win->right.i != rightmost_clip.i || win->right.j != rightmost_clip.j) {
 		clip[0] = win->right.i;
 		clip[1] = win->right.j;
-		glGetFloatv(GL_MODELVIEW_MATRIX,mvm);
-        MatrixStack::Instance()->matrixMode(MS_MODELVIEW);
-        MatrixStack::Instance()->pushMatrix();
-        MatrixStack::Instance()->loadMatrixf(mvm);
         MatrixStack::Instance()->enablePlane(1);
         MatrixStack::Instance()->clipPlanef(1, clip);
-        MatrixStack::Instance()->popMatrix();
 	} else {
 		MatrixStack::Instance()->disablePlane(1);
 	}
@@ -969,13 +959,8 @@ void RenderRasterize_Shader::render_node_object(render_object_data *object, bool
 			plane[2] = -1.0;
 			plane[3] = h;
 		}
-        glGetFloatv(GL_MODELVIEW_MATRIX,mvm);
-        MatrixStack::Instance()->matrixMode(MS_MODELVIEW);
-        MatrixStack::Instance()->pushMatrix();
-        MatrixStack::Instance()->loadMatrixf(mvm);
         MatrixStack::Instance()->clipPlanef(5, plane);
         MatrixStack::Instance()->enablePlane(5);
-        MatrixStack::Instance()->popMatrix();
 	} else if (other_side_of_media) {
 		// When there's no media present, we can skip the second pass.
 		return;

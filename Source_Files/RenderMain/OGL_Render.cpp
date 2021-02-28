@@ -541,7 +541,8 @@ bool OGL_StartRun()
 	    npotTextures = true;
 	}
 
-	FBO_Allowed = false;
+    FBO_Allowed = true; //We pretty much need to assume FBOs are going to work.
+    /*FBO_Allowed = false;
 	if (!OGL_CheckExtension("GL_EXT_framebuffer_object"))
 	{
 		logWarning("Framebuffer Objects not available");
@@ -550,7 +551,7 @@ bool OGL_StartRun()
 	else
 	{
 		FBO_Allowed = true;
-	}
+	}*/
 
 	Bloom_sRGB = false;
 	if (TEST_FLAG(graphics_preferences->OGL_Configure.Flags, OGL_Flag_Blur))
@@ -990,7 +991,7 @@ bool OGL_SetView(view_data &View)
 
 	// World coordinates to Marathon eye coordinates
 	MSI()->loadIdentity();
-	glGetFloatv(GL_MODELVIEW_MATRIX,CenteredWorld_2_MaraEye);
+    MSI()->getFloatv(MS_MODELVIEW_MATRIX,CenteredWorld_2_MaraEye);
 	
 	// Do rotation first:
 	const double TrigMagReciprocal = 1/double(TRIG_MAGNITUDE);
@@ -1009,17 +1010,17 @@ bool OGL_SetView(view_data &View)
 
 	// Do a translation and then save;
 	MSI()->translatef(-View.origin.x,-View.origin.y,-View.origin.z);
-	glGetFloatv(GL_MODELVIEW_MATRIX,World_2_MaraEye);
+    MSI()->getFloatv(MS_MODELVIEW_MATRIX,World_2_MaraEye);
 	
 	// Find the appropriate modelview matrix for 3D-model inhabitant rendering
 	MSI()->loadMatrixf(MaraEye_2_OGLEye);
 	MSI()->multMatrixf(World_2_MaraEye);
-	glGetFloatv(GL_MODELVIEW_MATRIX,World_2_OGLEye);
+    MSI()->getFloatv(MS_MODELVIEW_MATRIX,World_2_OGLEye);
 	
 	// Find the appropriate modelview matrix for 3D-model skybox rendering
 	MSI()->loadMatrixf(MaraEye_2_OGLEye);
 	MSI()->multMatrixf(CenteredWorld_2_MaraEye);
-	glGetFloatv(GL_MODELVIEW_MATRIX,CenteredWorld_2_OGLEye);
+    MSI()->getFloatv(MS_MODELVIEW_MATRIX,CenteredWorld_2_OGLEye);
 	
 	// Find world-to-screen and screen-to-world conversion factors;
 	// be sure to have some fallbacks in case of zero
@@ -1035,7 +1036,7 @@ bool OGL_SetView(view_data &View)
 	// Find the OGL-eye-to-screen matrix
 	// Remember that z is small negative to large negative (OpenGL style)
 	MSI()->loadIdentity();
-	glGetFloatv(GL_MODELVIEW_MATRIX,OGLEye_2_Screen);
+    MSI()->getFloatv(MS_MODELVIEW_MATRIX,OGLEye_2_Screen);
 	OGLEye_2_Screen[0] = XScale;
 	OGLEye_2_Screen[4+1] = YScale;
 	OGLEye_2_Screen[4*2] = - XOffset;
@@ -1048,7 +1049,7 @@ bool OGL_SetView(view_data &View)
 	// Find the OGL-eye-to-clip matrix:
 	MSI()->loadMatrixf(Screen_2_Clip);
 	MSI()->multMatrixf(OGLEye_2_Screen);
-	glGetFloatv(GL_MODELVIEW_MATRIX,OGLEye_2_Clip);
+    MSI()->getFloatv(MS_MODELVIEW_MATRIX,OGLEye_2_Clip);
 	
 	// Restore the default modelview matrix
 	MSI()->loadIdentity();
@@ -1129,7 +1130,7 @@ bool OGL_SetForegroundView(bool HorizReflect)
 
 	// Find the appropriate modelview matrix for 3D-model inhabitant rendering
 	MSI()->loadMatrixf(Foreground_2_OGLEye);
-	glGetFloatv(GL_MODELVIEW_MATRIX,World_2_OGLEye);
+    MSI()->getFloatv(MS_MODELVIEW_MATRIX,World_2_OGLEye);
 	
 	// Perform the reflection if desired; refer to above definition of Foreground_2_OGLEye
 	if (HorizReflect) World_2_OGLEye[0] = -1;
